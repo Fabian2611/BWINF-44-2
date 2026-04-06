@@ -1,0 +1,1 @@
+/home/fabian/files/Source/Competitive/BWInf2025-2/aufgabe3/target/debug/aufgabe3: /home/fabian/files/Source/Competitive/BWInf2025-2/aufgabe3/src/main.rs /home/fabian/files/Source/Competitive/BWInf2025-2/aufgabe3/src/profile.rs

@@ -1,0 +1,23 @@
+\babel@toc {nil}{}\relax 
+\contentsline {section}{\numberline {1}Lösungsidee}{1}{section.1}%
+\contentsline {section}{\numberline {2}Umsetzung}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Datenstrukturen}{2}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Restwege und Streikkosten}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Bestimmung der sicheren Route}{3}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Rekonstruktion und Ausweichrouten}{3}{subsection.2.4}%
+\contentsline {section}{\numberline {3}Laufzeit}{3}{section.3}%
+\contentsline {section}{\numberline {4}Werkzeuge}{3}{section.4}%
+\contentsline {section}{\numberline {5}Beispiele}{4}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Beispiel 00}{4}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Beispiel 01}{4}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Beispiel 02}{5}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Beispiel 03}{6}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}Beispiel 04}{6}{subsection.5.5}%
+\contentsline {subsection}{\numberline {5.6}Beispiel 05}{7}{subsection.5.6}%
+\contentsline {subsection}{\numberline {5.7}Beispiel 06}{7}{subsection.5.7}%
+\contentsline {subsection}{\numberline {5.8}Beispiel 07}{7}{subsection.5.8}%
+\contentsline {subsection}{\numberline {5.9}Beispiel 08}{7}{subsection.5.9}%
+\contentsline {subsection}{\numberline {5.10}Beispiel 09}{7}{subsection.5.10}%
+\contentsline {subsection}{\numberline {5.11}Beispiel 10}{8}{subsection.5.11}%
+\contentsline {section}{\numberline {6}Quellcode}{8}{section.6}%
+\providecommand \tocbasic@end@toc@file {}\tocbasic@end@toc@file 

@@ -1,0 +1,31 @@
+digraph G {
+  splines=true; overlap=false; rankdir=LR; bgcolor="#2e2e2e";
+  node [fontname="Arial", shape=circle, style=filled];
+  edge [fontname="Arial", fontsize=10];
+  n0 [label="S", fillcolor=green];
+  n1 [label="[1 1]", fillcolor=red];
+  n2 [label="[2 1]", fillcolor=red];
+  n3 [label="[3 1]", fillcolor=red];
+  n4 [label="[4 2]", fillcolor=red];
+  n5 [label="[5 2]", fillcolor=red];
+  n6 [label="T", fillcolor=lightblue];
+  n0 -> n1 [dir=none, color="#444444", penwidth=1, label="1", fontcolor="#777777", constraint=false];
+  n0 -> n2 [dir=none, color="#444444", penwidth=1, label="4", fontcolor="#777777", constraint=false];
+  n0 -> n3 [dir=none, color="#444444", penwidth=1, label="3", fontcolor="#777777", constraint=false];
+  n1 -> n2 [dir=none, color="#444444", penwidth=1, label="2", fontcolor="#777777", constraint=false];
+  n2 -> n3 [dir=none, color="#444444", penwidth=1, label="1", fontcolor="#777777", constraint=false];
+  n2 -> n4 [dir=none, color="#444444", penwidth=1, label="7", fontcolor="#777777", constraint=false];
+  n3 -> n5 [dir=none, color="#444444", penwidth=1, label="5", fontcolor="#777777", constraint=false];
+  n4 -> n6 [dir=none, color="#444444", penwidth=1, label="3", fontcolor="#777777", constraint=false];
+  n5 -> n6 [dir=none, color="#444444", penwidth=1, label="1", fontcolor="#777777", constraint=false];
+  n0 -> n3 [color=red, penwidth=4, label=".1", fontcolor=red];
+  n3 -> n5 [color=red, penwidth=4, label=".2", fontcolor=red];
+  n5 -> n6 [color=red, penwidth=4, label=".3", fontcolor=red];
+  n3 -> n2 [color=cyan, penwidth=2, style=dashed, label="3.1", fontcolor=cyan];
+  n2 -> n3 [color=cyan, penwidth=2, style=dashed, label="3.2", fontcolor=cyan];
+  n3 -> n5 [color=cyan, penwidth=2, style=dashed, label="3.3", fontcolor=cyan];
+  n5 -> n6 [color=cyan, penwidth=2, style=dashed, label="3.4", fontcolor=cyan];
+  n5 -> n6 [color=green, penwidth=2, style=dashed, label="5.1", fontcolor=green];
+  n6 -> n4 [color=green, penwidth=2, style=dashed, label="5.2", fontcolor=green];
+  n4 -> n6 [color=green, penwidth=2, style=dashed, label="5.3", fontcolor=green];
+}
