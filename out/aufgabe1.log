@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.30)  31 MAR 2026 15:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.3.30)  6 APR 2026 19:40
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1184,51 +1184,51 @@ h.png> <./figur_superblock.png>]
 <figur2.png, id=44, 280.04625pt x 210.7875pt>
 File: figur2.png Graphic file (type png)
 <use figur2.png>
-Package pdftex.def Info: figur2.png  used on input line 166.
+Package pdftex.def Info: figur2.png  used on input line 167.
 (pdftex.def)             Requested size: 136.57462pt x 102.8011pt.
 <figur2_graph.png, id=45, 418.56375pt x 480.79625pt>
 File: figur2_graph.png Graphic file (type png)
 <use figur2_graph.png>
-Package pdftex.def Info: figur2_graph.png  used on input line 173.
+Package pdftex.def Info: figur2_graph.png  used on input line 174.
 (pdftex.def)             Requested size: 91.04742pt x 104.57967pt.
 
-Underfull \hbox (badness 1389) in paragraph at lines 174--174
+Underfull \hbox (badness 1389) in paragraph at lines 175--175
 [][][]|\T1/cmr/m/n/9 Der resultierende,
  []
 
 <figur2_superblock.png, id=46, 179.67125pt x 348.30125pt>
 File: figur2_superblock.png Graphic file (type png)
 <use figur2_superblock.png>
-Package pdftex.def Info: figur2_superblock.png  used on input line 180.
+Package pdftex.def Info: figur2_superblock.png  used on input line 181.
 (pdftex.def)             Requested size: 91.04742pt x 176.50458pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 181--181
+Underfull \hbox (badness 10000) in paragraph at lines 182--182
 [][][]|\T1/cmr/m/n/9 Der kondensierte
  []
 
 <figur2_labeled.png, id=47, 264.99pt x 533.995pt>
 File: figur2_labeled.png Graphic file (type png)
 <use figur2_labeled.png>
-Package pdftex.def Info: figur2_labeled.png  used on input line 186.
+Package pdftex.def Info: figur2_labeled.png  used on input line 187.
 (pdftex.def)             Requested size: 91.04742pt x 183.4707pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 187--187
+Underfull \hbox (badness 10000) in paragraph at lines 188--188
 [][][]|\T1/cmr/m/n/9 Der Graph mit
  []
 
 <figur3.png, id=48, 501.875pt x 133.49875pt>
 File: figur3.png Graphic file (type png)
 <use figur3.png>
-Package pdftex.def Info: figur3.png  used on input line 202.
+Package pdftex.def Info: figur3.png  used on input line 203.
 (pdftex.def)             Requested size: 501.87376pt x 133.4984pt.
 
-Overfull \hbox (56.62721pt too wide) in paragraph at lines 202--203
+Overfull \hbox (56.62721pt too wide) in paragraph at lines 203--204
 [][] 
  []
 
 [2 <./figur_labeled.png> <./figur2.png> <./figur2_graph.png> <./figur2_superblo
 ck.png> <./figur2_labeled.png> <./figur3.png>]
-Overfull \hbox (47.3664pt too wide) in paragraph at lines 219--223
+Overfull \hbox (47.3664pt too wide) in paragraph at lines 220--224
 \T1/cmr/m/n/10 Beispielsweise kann $\OT1/cmr/m/n/10 (+\OML/cmm/m/it/10 Y; \OT1/
 cmr/m/n/10 +\OML/cmm/m/it/10 X; \OMS/cmsy/m/n/10 ^^@\OML/cmm/m/it/10 Y; \OMS/cm
 sy/m/n/10 ^^@\OML/cmm/m/it/10 X\OT1/cmr/m/n/10 )$ \T1/cmr/m/n/10 nur identisch 
@@ -1241,14 +1241,14 @@ $
  []
 
 LaTeX Font Info:    Trying to load font information for T1+cmtt on input line 2
-28.
+29.
 (/usr/share/texlive/texmf-dist/tex/latex/base/t1cmtt.fd
 File: t1cmtt.fd 2023/04/13 v2.5m Standard LaTeX font definitions
 )
-./aufgabe1.tex:234: Misplaced alignment tab character &.
+./aufgabe1.tex:235: Misplaced alignment tab character &.
 <argument> ...empty \ignorespaces  Hopcroft, J., &
                                                    Tarjan, R. (1973). Algori...
-l.234     }
+l.235     }
            ) geteilt. Artikulationspunkte sind mÃ¶gliche Drehpunkte unserer ...
 I can't figure out why you would want to use a tab mark
 here. If you just want an ampersand, the remedy is
@@ -1258,33 +1258,64 @@ you're probably due for more error messages, and you
 might try typing `S' now just to see what is salvageable.
 
 
-Overfull \hbox (15.98804pt too wide) in paragraph at lines 230--237
+Overfull \hbox (15.98804pt too wide) in paragraph at lines 231--238
 []\T1/cmr/m/n/10 Um nun Zyklen zu erkennen, werden die Graphen mithilfe einer T
 iefensuche in zweifach zusammenhängende
  []
 
 
-Overfull \hbox (8.67038pt too wide) in paragraph at lines 264--266
+Overfull \hbox (8.67038pt too wide) in paragraph at lines 265--268
 []\T1/cmr/m/n/10 Hiermit zerfällt die Figur in eine Menge von Superknoten, Arti
 kulationspunkten (gewöhnlichen Plättchen)
  []
 
 
-./aufgabe1.tex:276: Package keyval Error: italicconsole undefined.
+Overfull \hbox (10.36319pt too wide) in paragraph at lines 269--271
+[]\T1/cmr/m/n/10 Jeder Superknoten beinhält seine interne, zyklische Abfolge an
+ Verbindungen, z.B. $\OT1/cmr/m/n/10 (+\OML/cmm/m/it/10 X; \OT1/cmr/m/n/10 +\OM
+L/cmm/m/it/10 Y; \OMS/cmsy/m/n/10 ^^@\OML/cmm/m/it/10 X; \OMS/cmsy/m/n/10 ^^@\O
+ML/cmm/m/it/10 Y\OT1/cmr/m/n/10 )$\T1/cmr/m/n/10 ,
+ []
+
+[3]
+File: figur2_labeled.png Graphic file (type png)
+<use figur2_labeled.png>
+Package pdftex.def Info: figur2_labeled.png  used on input line 297.
+(pdftex.def)             Requested size: 113.81102pt x 229.34448pt.
+ [4]
+./aufgabe1.tex:351: Illegal parameter number in definition of \Hy@tempa.
+<to be read again> 
+                   m
+l.351     }
+            und damit $O(V)$.
+You meant to type ## instead of #, right?
+Or maybe a } was forgotten somewhere earlier, and things
+are all screwed up? I'm going to assume that you meant ##.
+
+./aufgabe1.tex:351: Illegal parameter number in definition of \Hy@tempa.
+<to be read again> 
+                   m
+l.351     }
+            und damit $O(V)$.
+You meant to type ## instead of #, right?
+Or maybe a } was forgotten somewhere earlier, and things
+are all screwed up? I'm going to assume that you meant ##.
+
+
+./aufgabe1.tex:362: Package keyval Error: italicconsole undefined.
 
 See the keyval package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.276     \begin{lstlisting}[style=plain]
+l.362     \begin{lstlisting}[style=plain]
                                          
 Try typing  <return>  to proceed.
 If that doesn't work, type  X <return>  to quit.
 
-[3]
 LaTeX Font Info:    Font shape `T1/cmtt/bx/n' in size <9> not available
-(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 287.
- [4] 
+(Font)              Font shape `T1/cmtt/m/n' tried instead on input line 373.
+[5] 
 enddocument/afterlastpage: lastpage setting LastPage.
 (/home/fabian/files/Source/Competitive/BWInf2025-2/out/aufgabe1.aux)
  ***********
@@ -1295,41 +1326,42 @@ Package rerunfilecheck Info: File `aufgabe1.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 22722 strings out of 476106
- 419159 string characters out of 5793933
- 1962975 words of memory out of 5000000
- 44435 multiletter control sequences out of 15000+600000
- 577339 words of font info for 82 fonts, out of 8000000 for 9000
+ 22730 strings out of 476106
+ 419248 string characters out of 5793933
+ 1966975 words of memory out of 5000000
+ 44438 multiletter control sequences out of 15000+600000
+ 577652 words of font info for 83 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
  108i,20n,107p,10921b,2335s stack positions out of 10000i,1000n,20000p,200000b,200000s
- </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0900.60
-0pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti0800.
-600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm080
+ </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0800.60
+0pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt0900.
+600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti080
 0.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm0
-600.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecr
-m0700.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/e
-cti1000.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec
-/ectt1000.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/
-ec/tcrm1000.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
-n/ec/ecrm1200.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
-pen/ec/ecrm0900.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jkn
-appen/ec/ecrm1000.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/j
-knappen/ec/ecsx1000.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour
-/jknappen/ec/ecsx1440.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfo
-ur/jknappen/ec/ecrm1728.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/lj
-four/jknappen/ec/ecbx2488.600pk></usr/share/texlive/texmf-dist/fonts/type1/publ
-ic/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/ams
-fonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
-m/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10
-.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></u
-sr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/sha
-re/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texl
-ive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
+800.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/ecr
+m0600.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec/e
+crm0700.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/ec
+/ecti1000.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappen/
+ec/ectt1000.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknappe
+n/ec/tcrm1000.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jknap
+pen/ec/ecrm1200.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/jkn
+appen/ec/ecrm0900.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour/j
+knappen/ec/ecrm1000.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfour
+/jknappen/ec/ecsx1000.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/ljfo
+ur/jknappen/ec/ecsx1440.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/lj
+four/jknappen/ec/ecrm1728.600pk> </home/fabian/.texlive2023/texmf-var/fonts/pk/
+ljfour/jknappen/ec/ecbx2488.600pk></usr/share/texlive/texmf-dist/fonts/type1/pu
+blic/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr
+10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb><
+/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/s
+hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/te
+xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
 Output written on /home/fabian/files/Source/Competitive/BWInf2025-2/out/aufgabe
-1.pdf (4 pages, 274532 bytes).
+1.pdf (5 pages, 297892 bytes).
 PDF statistics:
- 601 PDF objects out of 1000 (max. 8388607)
- 169 compressed objects within 2 object streams
- 33 named destinations out of 1000 (max. 500000)
+ 668 PDF objects out of 1000 (max. 8388607)
+ 187 compressed objects within 2 object streams
+ 38 named destinations out of 1000 (max. 500000)
  94 words of extra memory for PDF output out of 10000 (max. 10000000)
 

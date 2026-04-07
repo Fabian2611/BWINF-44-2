@@ -1,0 +1,135 @@
+\documentclass[a4paper,10pt,ngerman]{scrartcl}
+\usepackage{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+\usepackage[a4paper,margin=2.5cm,footskip=0.5cm]{geometry}
+
+% Die nächsten drei Felder bitte anpassen:
+\newcommand{\Aufgabe}{Aufgabe 2: Gießroboter} % Aufgabennummer und Aufgabennamen angeben
+\newcommand{\TeilnahmeId}{79418}              % Teilnahme-ID angeben
+\newcommand{\Name}{Fabian Schwarz}            % Name des Bearbeiter / der Bearbeiterin dieser Aufgabe angeben
+
+
+% Kopf- und Fußzeilen
+\usepackage{scrlayer-scrpage, lastpage}
+\setkomafont{pageheadfoot}{\large\textrm}
+\lohead{\Aufgabe}
+\cohead{\Name}
+\rohead{Teilnahme-ID: \TeilnahmeId}
+\cfoot*{\thepage{}/\pageref{LastPage}}
+
+% Position des Titels
+\usepackage{titling}
+\setlength{\droptitle}{-1.0cm}
+
+% Für mathematische Befehle und Symbole
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage{float}
+% Für Bilder
+\usepackage{graphicx}
+
+% Für Algorithmen
+\usepackage{algpseudocode}
+
+% Für Quelltext
+\usepackage{listings, listings-rust}
+\usepackage{color}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{
+    keywordstyle=\color{blue},commentstyle=\color{mygreen},
+    stringstyle=\color{mymauve},rulecolor=\color{black},
+    basicstyle=\footnotesize\ttfamily,numberstyle=\tiny\color{mygray},
+    captionpos=b, % sets the caption-position to bottom
+    keepspaces=true, % keeps spaces in text
+    numbers=left, numbersep=5pt, showspaces=false,showstringspaces=true,
+    showtabs=false, stepnumber=2, tabsize=2, title=\lstname
+}
+\lstdefinelanguage{JavaScript}{ % JavaScript ist als einzige Sprache noch nicht vordefiniert -- Rust auch nicht :<
+    keywords={break, case, catch, continue, debugger, default, delete, do, else, finally, for, function, if, in, instanceof, new, return, switch, this, throw, try, typeof, var, void, while, with},
+    morecomment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]',
+    morestring=[b]",
+    sensitive=true
+}
+
+% Diese beiden Pakete müssen zuletzt geladen werden
+\usepackage{amsopn}
+\usepackage{amstext}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{subcaption}
+
+% Daten für die Titelseite
+\title{\textbf{\Huge\Aufgabe}}
+\author{\LARGE Teilnahme-ID: \LARGE \TeilnahmeId \\\\
+\LARGE Bearbeiter/-in dieser Aufgabe: \\
+\LARGE \Name\\\\}
+\date{\LARGE\today}
+
+\lstdefinestyle{plain}{
+    language={},
+    keywordstyle=\color{black},
+    commentstyle=\color{black},
+    stringstyle=\color{black},
+    numbers=none,
+    italicconsole=false
+}
+
+\lstset{frame=tb,
+    language=Rust,
+    aboveskip=3mm,
+    belowskip=1mm,
+    showstringspaces=false,
+    columns=flexible,
+    basicstyle={\small\ttfamily},
+    numbers=none,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue},
+    commentstyle=\color{dkgreen},
+    stringstyle=\color{mauve},
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=3
+}
+
+\begin{document}
+
+    \maketitle
+    \tableofcontents
+
+    \vspace{0.5cm}
+
+
+    \section{Lösungsidee}
+
+
+    \section{Umsetzung}
+
+
+    \section{Werkzeuge}
+    Der Code wurde vollständig in Rust 1.94.1 (e408947bf 2026-03-25) geschrieben.
+
+    \section{Beispiele}
+
+    \begin{lstlisting}[style=plain]
+        1
+        2
+        3
+    \end{lstlisting}
+
+
+    \section{Quellcode}
+    Auslassungen sind hier mit \texttt{/* [...] */} markiert.
+
+    \begin{lstlisting}[style=colouredRust, label={lst:maincode}]
+        fn solve() {
+            return;
+        }
+    \end{lstlisting}
+
+\end{document}

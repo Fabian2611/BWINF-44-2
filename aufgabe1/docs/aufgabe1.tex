@@ -155,8 +155,9 @@
         \end{minipage}\label{fig:figure}
     \end{figure}
 
-    Der Ursprungsknoten kann und muss sogar arbiträr ausgewählt werden. Man hat aktuell noch keinerlei Wissen darüber,
-    welcher Knoten welchem Gegenknoten im anderen Graphen entspricht. Es wird später erläutert, wieso das erlaubt ist.
+    Der Ursprungsknoten muss arbiträr, aber eindeutig, ausgewählt werden. Man hat aktuell noch keinerlei Wissen darüber,
+    welcher Knoten welchem Gegenknoten im anderen Graphen entspricht. Es macht daher Sinn, die Zentren des Baums zu
+    verwenden, wie sich in der Umsetzung zeigt.
     Ein komplexeres Beispiel könnte wie folgt aussehen:
 
     \begin{figure}[H]
@@ -192,12 +193,12 @@
 
     Zu Beginn werden den Plättchen beliebige Indices verliehen. Diese bleiben bei der Umwandlung in den Graphen
     natürlich erhalten, sind nur hier nicht abgebildet. Es werden erneut Zyklen zu Superblöcken kondensiert, und
-    schließlich ein arbiträrer Ursprungsknoten (H) gewählt, von welchem aus der Graph traversiert und die Verbindungen
-    beschriftet werden. Der Graph bleibt ungerichtet, ist hier aber, um das Traversieren zu kennzeichnen, mit Pfeilen
-    dargestellt. Im Superknoten ist gespeichert, aus welchen Knoten dieser zusammengesetzt ist.
+    schließlich ein hier noch arbiträrer Ursprungsknoten (H) gewählt, von welchem aus der Graph traversiert und die
+    Verbindungen beschriftet werden. Der Graph bleibt ungerichtet, ist hier aber, um das Traversieren zu kennzeichnen,
+    mit Pfeilen dargestellt. Im Superknoten ist gespeichert, aus welchen Knoten dieser zusammengesetzt ist.
 
-    Be einer 180°-Drehung um einen Stift beobachtet man, dass alle Stifte parallel zur Drehachse ihre Richtung behalten,
-    während alle senkrechten Stifte das Vorzeichen ihrer Richtung ändern. Ein Beispiel:
+    Bei einer 180°-Drehung um einen Stift beobachtet man, dass alle Stifte parallel zur Drehachse ihre Richtung
+    behalten, während alle senkrechten Stifte das Vorzeichen ihrer Richtung ändern. Ein Beispiel:
 
     \includegraphics{figur3}
 
@@ -211,9 +212,9 @@
         Wurzel aus $V_1 = (+X, +Y, -X)$, so muss $V_2$ auch eine $(\pm X, \pm Y, \pm X)$ Abfolge sein.
         \item Zyklen müssen in beiden Figuren identisch sein, d.h., die gleiche Länge und die gleiche Abfolge von
         X- und Y-Verbindungen besitzen; die genaue Richtung ($\pm1$) ist erstmal irrelevant.
-        \item In Baum B muss es genau ein Plättchen $P$ geben, dass als Drehpunkt fungiert. An ihm ist eine Drehachse
-        $X$ oder $Y$ definiert. Alle Stifte, die über diese Drehachse an $P$ hängen, behalten ihre Richtung bei.
-        Alle Stifte, die über die andere Achse an $P$ hängen, folgen den oben festgestellten Regeln: laufen sie
+        \item In Baum B muss es pro Drehung genau ein Plättchen $P$ geben, dass als Drehpunkt fungiert. An ihm ist eine
+        Drehachse $X$ oder $Y$ definiert. Alle Stifte, die über diese Drehachse an $P$ hängen, behalten ihre Richtung
+        bei. Alle Stifte, die über die andere Achse an $P$ hängen, folgen den oben festgestellten Regeln: laufen sie
         parallel zur Drehachse, behalten sie ihre Richtung identisch bei; andernfalls ändert sich das Vorzeichen der
         Richtung.
         \item Zyklen müssen entweder vollständig identisch bleiben, d.h., identische Abfolgen an Verbindungen besitzen,
@@ -222,6 +223,11 @@
         Abfolgen haben natürlich keinen festen Startpunkt, d.h. $(+Y, +X, -Y, -X) = (-X, +Y, +X, -Y)$.
     \end{itemize}
 
+    Gesondert sind Figuren zu betrachten, in welchen zwei Stifte gleichzeitig gedreht werden müssen, um die Figuren in
+    einander zu überführen, da dies eine unzulässige Transformation ist. Jeder Zwischenschritt der Überführung, d.h. an
+    einem einzelnen Plättchen und Stift, muss eine gültige Gitterkonfiguration darstellen. Wenn ein Zyklus in
+    der Zielfigur so orientiert ist, dass sie nur durch eine gleichzeitige Drehung an zwei parallelen Stiften oder
+    durch ein Überlappen mit schon vorhandenen Plättchen entstehen kann, wird die Figur als nicht überführbar eingestuft.
 
     \section{Umsetzung}
     Zu Beginn werden die Figuren eingelesen und als ungerichtete, gewichtete Graphen dargestellt. Die Gewichte sind hier
@@ -229,7 +235,7 @@
 
     Um nun Zyklen zu erkennen, werden die Graphen mithilfe einer Tiefensuche in zweifach zusammenhängende Komponenten
     (\textit{Biconnected Components} nach Hopcroft and Tarjan (1973)\footnote{
-        Hopcroft, J., & Tarjan, R. (1973). Algorithm 447: efficient algorithms for graph manipulation.
+        Hopcroft, J., \& Tarjan, R. (1973). Algorithm 447: efficient algorithms for graph manipulation.
         \textit{Communications of the ACM}, \textit{16}(6), 372–378. https://doi.org/10.1145/362248.362272
     }) geteilt. Artikulationspunkte sind mögliche Drehpunkte unserer Figur, die resultierenden ``Blöcke'' die starren
     Zyklen. Hierfür werden während der DFS alle Kanten auf einen Stack gelegt und, sobald ein Artikulationspunkt
@@ -246,7 +252,7 @@
         \begin{enumerate}
             \item für jeden Knoten $u$, rückwärts gehend, all seine (bereits besuchten) Nachbarn $v_i$, bis auf seinen
             direkten Vorgänger. Die von allen Nachbarn $v_i$ geringste \texttt{disc} übernimmt der Knoten $u$
-            als\texttt{low}.
+            als \texttt{low}.
             \item für jede Kante $u \to v$, rückwärts gehend\footnote{Im forward-pass wurde also eine Kante $u \to v$
                 abgelaufen; eigentlich läuft man hier von $v \to u$ rückwärts, dennoch wird die Kante hier als
                 $u \to v$ beschrieben, wobei $u$ die ``ältere'' ist.},
@@ -278,14 +284,91 @@
     \end{enumerate}
     Ist eine der Überprüfungen falsch, sind die Figuren nicht in einander überführbar.
 
-    Man wählt nun in Baum A einen beliebigen Knoten $R_A$ als Wurzel.
+    Um nun zwei Bäume zu vergleichen, müssen sie in eine Form gebracht werden, in der die genaue Indizierung der Knoten
+    für Vergleiche irrelevant wird. Hierzu werden von beiden Bäumen sukzessiv alle Blätter entfernt, bis nur noch 1
+    oder 2 Knoten übrig bleiben. Diese Punkte werden Zentren genannt, die folgend als Wurzeln der Bäume verwendet
+    werden. Hat einer der Bäume zwei Zentren, der andere jedoch nur eines, können die Bäume nicht isomorph sein.
+    Haben beide Bäume zwei Zentren, wird das erste Zentrum von Baum $A$ mit beiden Zentren des Baums $B$ Gegengeprüft,
+    und damit folgende Schritte zwei mal durchgeführt. Nur wenn beide scheitert, scheitert die ganze Überprüfung.
+
+    Von den Wurzeln $R_A$ und $R_B$ aus wird nun der Baum traversiert, und eine Signatur erstellt. Diese setzt sich aus
+    einer beliebig, aber immer gleich, sortierten Liste der Signaturen der Kinder und Achsen zu ihnen zusammen.
+    Ein Beispiel:
+
+    \begin{figure}[H]
+        \centering
+        \begin{minipage}{0.25\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{figur2_labeled}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.7\textwidth}
+            Hier ermittelt sich Knoten $5$ als Zentrum. Also wird der Baum, entgegen der in der Lösungsidee gewählten
+            Richtung, von ihm aus traversiert: Er hat die Kinder $2$, $9$, und $S(6, 3, 7, 4)$. Es wird  sich für eine
+            Sortierung nach Index entschieden, also ergibt sich (vorerst) die Signatur: \texttt{[(+Y, 2), (-Y, 9),
+            (+X, S(...))]}. Die Knoten werden nun erneut nach ihren Signaturen aufgelöst. Knoten 2 hat Knoten 1 als
+            Kind, der ein Blatt ist. Knoten 9 hat 8 als Kind, ebenfalls ein Blatt. Der Superknoten $S$ hat intern seine
+            Abfolge von Steckachsen gespeichert, also wird diese als seine Signatur eingefügt. Daher erweitert sich die
+            Signatur insgesamt zu \texttt{[(+Y, [(-X, "Blatt")]), (-Y, [(-X, "Blatt")]),(+X, [S(+Y, +X, -Y, -X);])]}.
+            Die gewählte Signatur von S ist hier beispielhaft ein einfacher Zyklus aus 4 Knoten; die Vorzeichen
+            entsprechen nicht genau dem Beispiel von oben. Nach dem Semikolon würde wie gewohnt eine Liste der
+            Nachbarknoten des Superknotens folgen, wenn er welche hätte. Diese Sonderregel ist wichtig, da sonst später
+            die Übereinstimmung der Zyklen nicht geprüft werden kann. Es ist zu beachten, dass die Achsenabfolgen
+            innerhalb von Superknoten zyklisch sind, d.h.\ weiterhin $(+Y, +X, -Y, -X) = (-X, +Y, +X, -Y)$, und so
+            weiter. Auch Zyklen, die die Abfolge genau ``rückwärts'' haben, sind identisch.
+        \end{minipage}\label{fig:figure2}
+    \end{figure}
+
+    Wenn die Signaturen zweier Bäume nun übereinstimmen, sind sie garantiert isomorph. Hierbei dürfen die Vorzeichen
+    der Verbindungen abweichen, da sich diese durch Drehungen ja ändern können; es wird nur auf gleiches Vorkommen
+    von $X$ und $Y$ geachtet. Stimmen die Signaturen nicht überein, sind sie nicht in einander überführbar.
+
+    Nun wird sich parallel in beiden Bäumen von den Blättern bis zur Wurzel hochgearbeitet:
+    \begin{itemize}
+        \item Blätter sind immer von Baum $A$ zu Baum $B$ überführbar.
+        \item Für jeden inneren Knoten wird geprüft, dass die Vorzeichen seiner Signatur zwischen den zwei Bäumen
+        entweder exakt identisch, für alle $X$ umgekehrt, für alle $Y$ umgekehrt, oder für alle Verbindungen
+        umgekehrt sind. Diese Vorzeichenregeln gelten auch innerhalb von Superknoten.
+    \end{itemize}
+    Ein Beispiel:
+
+    Baum A hat die Signatur
+
+    \texttt{[(+Y, [(-X, "Blatt")]), (-Y, [(-X, "Blatt")]),(+X, [S(+Y, +X, -Y, -X);])]}.
+
+    Baum B hat die Signatur
+
+    \texttt{[(+Y, [(+X, "Blatt")]), (-Y, [(-X, "Blatt")]),(+X, [S(-Y, +X, +Y, -X);])]}.
+
+    Die Signaturen sind in ihren Abfolgen der Achsen $X$ und $Y$ identisch. Der erste Knoten \texttt{[(-X, "Blatt")]}
+    wurde um die $Y$-Achse gedreht, wodurch sich das Vorzeichen von $X$ geändert hat. Der Zyklus $S$ wurde um die
+    $X$-Achse gedreht, wodurch sich die Vorzeichen aller internen $Y$-Verbindungen geändert haben. (Im Code ist das
+    anders umgesetzt, da Hashes effizienter sind als String Manipulation oder Listenoperationen.)
+
+    Wenn auch diese Überprüfung gelingt, bedeutet dies, dass die Figuren in einander überführbar sind.
+    Diese Überprüfung allein würde für die Lösung des Problems genügen, jedoch können durch die vorherigen Überprüfungen
+    einige trivialen Negativbeispiele früh erkannt werden.
+
+    Die interne Struktur der Superblöcke wird durch eine Liste von Richtungsvektoren $(\Delta x, \Delta y)$
+    repräsentiert. Beim rekursiven Vergleich wird sichergestellt, dass bei einer angenommenen Drehung um eine Achse
+    nicht nur die Brücken-Stifte im Baum, sondern auch alle internen Vektoren des Blocks konsistent transformiert werden.
+    Durch die Verwendung der Baumzentren als Wurzeln und den anschließenden Abgleich aller möglichen Drehungen
+    ($X$, $Y$, beide oder keine) pro Gelenk wird sichergestellt, dass nur physisch konsistente Transformationen zu
+    einem positiven Ergebnis führen.
 
     \section{Laufzeit}\label{sec:laufzeit}
-
+    Für $V$ Plättchen mit $E$ Verbindungen ist die Erstellung des Block-Cut-Trees über DFS $O(V + E)$. Die Suche
+    der Zentren ist annähernd $O(V)$. Das Generieren der Signaturen ist aufgrund der Sortierung der Listen mit je
+    maximal 4 Elementen unter $O(V \cdot \log(4))$ \footnote{
+        \url{https://doc.rust-lang.org/std/primitive.slice.html#method.sort_by_key}
+    } und damit $O(V)$.
+    Der Lösungsansatz ist also auch für größere $V$ und $E$ effizient.
 
     \section{Werkzeuge}
     Der Code wurde vollständig in Rust 1.94.1 (e408947bf 2026-03-25) geschrieben.
-
+    Das \href{https://crates.io/crates/petgraph}{\texttt{petgraph} Crate}
+    wurde für eine optimierte Implementierung von Graphen verwendet. Es verwaltet die Lifetimes von Knoten und Kanten
+    intern, was einigen Boilerplate-Code erspart.
 
     \section{Beispiele}
 

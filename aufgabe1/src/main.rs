@@ -1,581 +1,206 @@
-#![allow(dead_code)]
-
-use std::io::Write;
-mod profile;
-
-use std::collections::HashMap;
+use petgraph::graph::{NodeIndex, UnGraph};
+use petgraph::prelude::EdgeRef;
+use std::collections::{HashMap, HashSet};
 use std::fs;
-use std::fs::{File, OpenOptions};
+use std::cmp::min;
+use std::time::Instant;
 
-#[derive(PartialEq, Eq, Debug, Copy, Clone)]
-enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
+#[derive(PartialEq, Eq, Debug, Copy, Clone, Hash, PartialOrd, Ord)]
+enum Axis { Horizontal, Vertical }
+
+#[derive(PartialEq, Eq, Debug, Copy, Clone, Hash, PartialOrd, Ord)]
+struct Pin {
+    axis: Axis,
+    sign: i8, // 1 oder -1
 }
 
-#[derive(Debug, Clone)]
-struct Edge {
-    v1: u32,
-    d1: Direction,
-    v2: u32,
-    d2: Direction,
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum BCNode {
+    ArticulationPoint(NodeIndex),
+    // Ein Block wird durch seine internen Kanten-Vektoren relativ zum Eingang definiert
+    Block {
+        edges: Vec<(i32, i32)>, // (dx, dy) Paare der internen Stifte
+    },
 }
 
-#[derive(Debug, Clone)]
-struct GraphR {
-    n: u32,
-    edges: Vec<Edge>,
+type FigureGraph = UnGraph<(), Pin>;
+type BlockCutTree = UnGraph<BCNode, Pin>;
+
+struct BiconnectedResult {
+    articulation_points: HashSet<NodeIndex>,
+    blocks: Vec<Vec<(NodeIndex, NodeIndex, Pin)>>,
 }
 
-/// (deg(v), deg_v(v), deg_h(v), sorted list of neighbor degrees)
-type Signature = (u32, u32, u32, Vec<u32>);
-
-impl GraphR {
-    pub fn new(n: u32, edges: Vec<Edge>) -> Self {
-        GraphR { n, edges }
-    }
-
-    /// Returns the degree of the specified vertex.
-    pub fn degree(&self, vertex: u32) -> u32 {
-        self.edges
-            .iter()
-            .filter(|e| e.v1 == vertex || e.v2 == vertex)
-            .count() as u32
-    }
-
-    /// Returns the vertical degree of the specified vertex. Invariant when flipping.
-    pub fn degree_vertical(&self, vertex: u32) -> u32 {
-        self.edges
-            .iter()
-            .filter(|e| {
-                (e.v1 == vertex && (e.d1 == Direction::Up || e.d1 == Direction::Down))
-                    || (e.v2 == vertex && (e.d2 == Direction::Up || e.d2 == Direction::Down))
-            })
-            .count() as u32
-    }
-
-    /// Returns the horizontal degree of the specified vertex. Invariant when flipping.
-    pub fn degree_horizontal(&self, vertex: u32) -> u32 {
-        self.edges
-            .iter()
-            .filter(|e| {
-                (e.v1 == vertex && (e.d1 == Direction::Left || e.d1 == Direction::Right))
-                    || (e.v2 == vertex && (e.d2 == Direction::Left || e.d2 == Direction::Right))
-            })
-            .count() as u32
-    }
-
-    pub fn degree_sequence(&self) -> Vec<u32> {
-        let mut degrees: Vec<u32> = (0..self.n).map(|v| self.degree(v)).collect();
-        degrees.sort_unstable();
-        degrees
-    }
-
-    /// Returns the signatures of all vertices, ordered.
-    /// The signature of a vertex is a tuple of:
-    /// (degree, vertical degree, horizontal degree, sorted list of neighbor degrees)
-    /// As UP <-> DOWN and LEFT <-> RIGHT, the signature is invariant when flipping.
-    pub fn signatures(&self) -> Vec<Signature> {
-        let mut sigs = Vec::new();
-        for v in 0..self.n {
-            let deg = self.degree(v);
-            let deg_v = self.degree_vertical(v);
-            let deg_h = self.degree_horizontal(v);
-            let mut neighbor_degs = self.neighbour_degrees(v);
-            neighbor_degs.sort_unstable();
-            sigs.push((deg, deg_v, deg_h, neighbor_degs));
+impl BiconnectedResult {
+    fn from_graph(g: &FigureGraph) -> Self {
+        let mut disc = HashMap::new();
+        let mut low = HashMap::new();
+        let mut time = 0;
+        let mut articulation_points = HashSet::new();
+        let mut edge_stack = Vec::new();
+        let mut blocks_edges = Vec::new();
+        if let Some(start) = g.node_indices().next() {
+            dfs_bc(start, None, g, &mut disc, &mut low, &mut time, &mut edge_stack, &mut blocks_edges, &mut articulation_points);
         }
-        sigs.sort_unstable();
-        sigs
-    }
-
-    pub fn signature_to_node_list(&self) -> HashMap<Signature, Vec<u32>> {
-        let mut sig_map: HashMap<Signature, Vec<u32>> = HashMap::new();
-        for v in 0..self.n {
-            let sig = (
-                self.degree(v),
-                self.degree_vertical(v),
-                self.degree_horizontal(v),
-                {
-                    let mut neighbor_degrees = self.neighbour_degrees(v);
-                    neighbor_degrees.sort_unstable();
-                    neighbor_degrees
-                },
-            );
-            sig_map.entry(sig).or_default().push(v);
-        }
-        sig_map
-    }
-
-    pub fn neighbour_degrees(&self, vertex: u32) -> Vec<u32> {
-        let mut neighbor_degrees = Vec::new();
-        for e in &self.edges {
-            if e.v1 == vertex {
-                neighbor_degrees.push(self.degree(e.v2));
-            } else if e.v2 == vertex {
-                neighbor_degrees.push(self.degree(e.v1));
-            }
-        }
-        neighbor_degrees
+        BiconnectedResult { articulation_points, blocks: blocks_edges }
     }
 }
 
-fn flip(dir: Direction) -> Direction {
-    match dir {
-        Direction::Up => Direction::Down,
-        Direction::Down => Direction::Up,
-        Direction::Left => Direction::Right,
-        Direction::Right => Direction::Left,
-    }
-}
-
-fn parse_graphs(
-    path: &str,
-) -> Result<Vec<(GraphR, Vec<Vec<char>>, HashMap<(usize, usize), u32>)>, String> {
-    let inp = fs::read_to_string(path).map_err(|_| "Failed to read file".to_string())?;
-    let mut lines = inp.lines().peekable();
-    let mut all_graphs = Vec::new();
-
-    while let Some(line) = lines.next() {
-        let trimmed = line.trim();
-        if trimmed.is_empty() {
-            continue;
-        }
-
-        let size: Vec<u32> = trimmed
-            .split_whitespace()
-            .map(|s| {
-                s.parse::<u32>()
-                    .map_err(|_| "Invalid size values".to_string())
-            })
-            .collect::<Result<_, _>>()?;
-
-        if size.len() != 2 {
-            return Err("Size line must have exactly two values".into());
-        }
-
-        let (_x, y) = (size[0], size[1]);
-        let row_count = 2 * y - 1;
-
-        let mut grid: Vec<Vec<char>> = Vec::new();
-        for _ in 0..row_count {
-            let row_line = lines.next().ok_or("Expected more lines for graph grid")?;
-            grid.push(row_line.chars().collect());
-        }
-
-        let mut vertex_map = HashMap::new();
-        let mut vertex_id_counter = 0;
-
-        for py in 0..row_count as usize {
-            for px in 0..grid[py].len() {
-                if py % 2 == 0 && px % 2 == 0 {
-                    if let Some(&'o') = grid[py].get(px) {
-                        vertex_map.insert((px, py), vertex_id_counter);
-                        vertex_id_counter += 1;
-                    }
-                }
-            }
-        }
-
-        let mut edges = Vec::new();
-        for py in 0..row_count as usize {
-            for px in 0..grid[py].len() {
-                match grid[py].get(px) {
-                    Some('-') if py % 2 == 0 && px % 2 == 1 => {
-                        let v1 = vertex_map
-                            .get(&(px - 1, py))
-                            .ok_or("Edge missing start vertex")?;
-                        let v2 = vertex_map
-                            .get(&(px + 1, py))
-                            .ok_or("Edge missing end vertex")?;
-                        edges.push(Edge {
-                            v1: *v1,
-                            d1: Direction::Right,
-                            v2: *v2,
-                            d2: Direction::Left,
-                        });
-                    }
-                    Some('|') if py % 2 == 1 && px % 2 == 0 => {
-                        let v1 = vertex_map
-                            .get(&(px, py - 1))
-                            .ok_or("Edge missing top vertex")?;
-                        let v2 = vertex_map
-                            .get(&(px, py + 1))
-                            .ok_or("Edge missing bottom vertex")?;
-                        edges.push(Edge {
-                            v1: *v1,
-                            d1: Direction::Down,
-                            v2: *v2,
-                            d2: Direction::Up,
-                        });
-                    }
-                    _ => {}
-                }
-            }
-        }
-
-        all_graphs.push((
-            GraphR {
-                n: vertex_id_counter,
-                edges,
-            },
-            grid,
-            vertex_map,
-        ));
-    }
-
-    Ok(all_graphs)
-}
-
-fn main() {
-    profile!(run);
-}
-
-fn run() {
-    let args: Vec<String> = std::env::args().collect();
-    let path = args
-        .get(1)
-        .map(|s| s.as_str())
-        .unwrap_or("resources/transform0y.txt");
-
-    // parse graphs along with grid and vertex mapping
-    let graphs_with_grid =
-        parse_graphs(path).unwrap_or_else(|e| panic!("Error parsing graphs: {}", e));
-
-    if graphs_with_grid.len() < 2 {
-        panic!("Expected at least two graphs in the input file");
-    }
-
-    let (start, grid_start, vertex_map_start) = graphs_with_grid[0].clone();
-    let (end, _, _) = graphs_with_grid[1].clone();
-
-    println!("Start graph: {:?}", start);
-    println!("End graph: {:?}", end);
-
-    start.print_dot();
-    end.print_dot();
-
-    if are_transformers(
-        &start,
-        &end,
-        &grid_start,
-        &vertex_map_start,
-        &format!("{}_out.txt", path),
-    ) {
-        println!("The graphs are transformers of each other.");
-    } else {
-        println!("The graphs are NOT transformers of each other.");
-    }
-}
-
-// DEBUG ONLY
-use std::fmt::Write as FmtWrite;
-impl GraphR {
-    pub fn to_dot(&self) -> String {
-        let mut out = String::new();
-
-        writeln!(&mut out, "digraph G {{").unwrap();
-        writeln!(&mut out, "    rankdir=LR;").unwrap();
-        writeln!(&mut out).unwrap();
-
-        // Nodes
-        for v in 0..self.n {
-            writeln!(&mut out, "    {} [label=\"{}\"];", v, v).unwrap();
-        }
-
-        writeln!(&mut out).unwrap();
-
-        // Edges
-        for e in &self.edges {
-            writeln!(
-                &mut out,
-                "    {} -> {} [label=\"{:?} → {:?}\"];",
-                e.v1, e.v2, e.d1, e.d2
-            )
-            .unwrap();
-        }
-
-        writeln!(&mut out, "}}").unwrap();
-
-        out
-    }
-
-    pub fn print_dot(&self) {
-        println!("{}", self.to_dot());
-    }
-}
-
-fn are_transformers(
-    graph1: &GraphR,
-    graph2: &GraphR,
-    grid: &[Vec<char>],
-    vertex_map: &HashMap<(usize, usize), u32>,
-    out_path: &str,
-) -> bool {
-    if graph1.n != graph2.n
-        || graph1.degree_sequence() != graph2.degree_sequence()
-        || graph1.signatures() != graph2.signatures()
-    {
-        write_solution(out_path, &[], grid, vertex_map);
-        return false;
-    }
-
-    let sig_map1 = graph1.signature_to_node_list();
-    let sig_map2 = graph2.signature_to_node_list();
-
-    // group vertices by signature
-    let mut classes: Vec<(Vec<u32>, Vec<u32>)> = Vec::new();
-    for (sig, nodes1) in &sig_map1 {
-        let nodes2 = match sig_map2.get(sig) {
-            Some(n) => n,
-            None => {
-                write_solution(out_path, &[], grid, vertex_map);
-                return false;
-            }
-        };
-        if nodes1.len() != nodes2.len() {
-            write_solution(out_path, &[], grid, vertex_map);
-            return false;
-        }
-        classes.push((nodes1.clone(), nodes2.clone()));
-    }
-
-    // backtracking function to try all mappings
-    fn backtrack(
-        classes: &[(Vec<u32>, Vec<u32>)],
-        index: usize,
-        current_phi: &mut HashMap<u32, u32>,
-        graph1: &GraphR,
-        graph2: &GraphR,
-        grid: &[Vec<char>],
-        vertex_map: &HashMap<(usize, usize), u32>,
-        out_path: &str,
-    ) -> Option<Vec<u32>> {
-        if index == classes.len() {
-            // check consistency with DFS
-            let adj = build_adjacency(graph1, graph2, current_phi);
-            let mut x: HashMap<u32, u8> = HashMap::new();
-            let mut steps: Vec<u32> = Vec::new();
-            for v in 0..graph1.n {
-                if !x.contains_key(&v) {
-                    if !dfs(v, 0, &adj, &mut x, &mut steps) {
-                        return None;
-                    }
-                }
-            }
-            return Some(steps);
-        }
-
-        let (nodes1, nodes2) = &classes[index];
-        let mut used = vec![false; nodes2.len()];
-
-        fn permute(
-            nodes1: &[u32],
-            nodes2: &mut Vec<u32>,
-            used: &mut Vec<bool>,
-            current_phi: &mut HashMap<u32, u32>,
-            graph1: &GraphR,
-            graph2: &GraphR,
-            classes: &[(Vec<u32>, Vec<u32>)],
-            idx: usize,
-            grid: &[Vec<char>],
-            vertex_map: &HashMap<(usize, usize), u32>,
-            out_path: &str,
-        ) -> Option<Vec<u32>> {
-            if idx == nodes1.len() {
-                return backtrack(
-                    &classes[1..],
-                    0,
-                    current_phi,
-                    graph1,
-                    graph2,
-                    grid,
-                    vertex_map,
-                    out_path,
-                );
-            }
-            for j in 0..nodes2.len() {
-                if !used[j] {
-                    used[j] = true;
-                    current_phi.insert(nodes1[idx], nodes2[j]);
-                    if let Some(res) = permute(
-                        nodes1,
-                        nodes2,
-                        used,
-                        current_phi,
-                        graph1,
-                        graph2,
-                        classes,
-                        idx + 1,
-                        grid,
-                        vertex_map,
-                        out_path,
-                    ) {
-                        return Some(res);
-                    }
-                    current_phi.remove(&nodes1[idx]);
-                    used[j] = false;
-                }
-            }
-            None
-        }
-
-        permute(
-            nodes1,
-            &mut nodes2.clone(),
-            &mut used,
-            current_phi,
-            graph1,
-            graph2,
-            classes,
-            0,
-            grid,
-            vertex_map,
-            out_path,
-        )
-    }
-
-    let mut current_phi = HashMap::new();
-    if let Some(steps) = backtrack(
-        &classes,
-        0,
-        &mut current_phi,
-        graph1,
-        graph2,
-        grid,
-        vertex_map,
-        out_path,
-    ) {
-        let num_steps = steps.len();
-        let mut file = File::create(out_path).unwrap();
-        writeln!(file, "y").unwrap();
-        writeln!(file, "{}", num_steps).unwrap();
-        for &v in &steps {
-            let pos = vertex_coords(v, vertex_map);
-            writeln!(file, "{} {}", pos.0, pos.1).unwrap();
-            writeln!(file, "{}", render_change(grid, pos)).unwrap();
-            writeln!(file).unwrap();
-        }
-        true
-    } else {
-        write_solution(out_path, &[], grid, vertex_map);
-        false
-    }
-}
-
-/// Build adjacency list with edges labeled 0 (no flip) or 1 (must flip)
-fn build_adjacency(
-    graph: &GraphR,
-    target: &GraphR,
-    phi: &HashMap<u32, u32>,
-) -> HashMap<u32, Vec<(u32, u8)>> {
-    let mut adj: HashMap<u32, Vec<(u32, u8)>> = HashMap::new();
-
-    for e in &graph.edges {
-        let v1 = e.v1;
-        let v2 = e.v2;
-
-        let w1 = *phi.get(&v1).unwrap();
-        let w2 = *phi.get(&v2).unwrap();
-
-        let start_dirs = (e.d1, e.d2);
-
-        let target_edge = target
-            .edges
-            .iter()
-            .find(|te| (te.v1 == w1 && te.v2 == w2) || (te.v1 == w2 && te.v2 == w1))
-            .expect("Edge must exist");
-
-        let c = if (start_dirs.0 != target_edge.d1 || start_dirs.1 != target_edge.d2)
-            && (start_dirs.0 != target_edge.d2 || start_dirs.1 != target_edge.d1)
-        {
-            1
+fn dfs_bc(u: NodeIndex, p: Option<NodeIndex>, g: &FigureGraph, d: &mut HashMap<NodeIndex, u32>, l: &mut HashMap<NodeIndex, u32>, t: &mut u32, st: &mut Vec<(NodeIndex, NodeIndex, Pin)>, bl: &mut Vec<Vec<(NodeIndex, NodeIndex, Pin)>>, ap: &mut HashSet<NodeIndex>) {
+    *t += 1; d.insert(u, *t); l.insert(u, *t);
+    let mut children = 0;
+    for edge in g.edges(u) {
+        let v = edge.target();
+        if Some(v) == p { continue; }
+        let pin = *edge.weight();
+        if let Some(&dv) = d.get(&v) {
+            l.insert(u, min(*l.get(&u).unwrap(), dv));
+            if dv < *d.get(&u).unwrap() { st.push((u, v, pin)); }
         } else {
-            0
-        };
-
-        adj.entry(v1).or_default().push((v2, c));
-        adj.entry(v2).or_default().push((v1, c));
-    }
-
-    adj
-}
-
-/// DFS to check if a consistent flip assignment exists
-fn dfs(
-    v: u32,
-    color: u8,
-    adj: &HashMap<u32, Vec<(u32, u8)>>,
-    x: &mut HashMap<u32, u8>,
-    steps: &mut Vec<u32>,
-) -> bool {
-    x.insert(v, color);
-    if color == 1 {
-        steps.push(v);
-    }
-
-    if let Some(neighbors) = adj.get(&v) {
-        for &(w, c) in neighbors {
-            if let Some(&xw) = x.get(&w) {
-                if xw != (color ^ c) {
-                    return false;
+            children += 1; st.push((u, v, pin));
+            dfs_bc(v, Some(u), g, d, l, t, st, bl, ap);
+            let lv = *l.get(&v).unwrap();
+            l.insert(u, min(*l.get(&u).unwrap(), lv));
+            if lv >= *d.get(&u).unwrap() {
+                if p.is_some() { ap.insert(u); }
+                let mut curr = Vec::new();
+                while let Some(e) = st.pop() {
+                    curr.push(e);
+                    if (e.0 == u && e.1 == v) || (e.0 == v && e.1 == u) { break; }
                 }
-            } else {
-                if !dfs(w, color ^ c, adj, x, steps) {
-                    return false;
-                }
+                bl.push(curr);
             }
         }
     }
+    if p.is_none() && children > 1 { ap.insert(u); }
+}
 
+fn build_bc_tree(_: &FigureGraph, res: &BiconnectedResult) -> BlockCutTree {
+    let mut tree = BlockCutTree::default();
+    let mut art_map = HashMap::new();
+    for &art in &res.articulation_points {
+        art_map.insert(art, tree.add_node(BCNode::ArticulationPoint(art)));
+    }
+    for block_edges in &res.blocks {
+        let mut internal_vecs = Vec::new();
+        for e in block_edges {
+            let dx = if e.2.axis == Axis::Horizontal { e.2.sign as i32 } else { 0 };
+            let dy = if e.2.axis == Axis::Vertical { e.2.sign as i32 } else { 0 };
+            internal_vecs.push((dx, dy));
+        }
+        let b_idx = tree.add_node(BCNode::Block { edges: internal_vecs });
+        let mut nodes = HashSet::new();
+        for e in block_edges { nodes.insert(e.0); nodes.insert(e.1); }
+        for &n in &nodes {
+            if let Some(&a_idx) = art_map.get(&n) {
+                let e = block_edges.iter().find(|e| e.0 == n || e.1 == n).unwrap();
+                tree.add_edge(b_idx, a_idx, e.2);
+            }
+        }
+    }
+    tree
+}
+
+fn find_centers(t: &BlockCutTree) -> Vec<NodeIndex> {
+    let cnt = t.node_count();
+    if cnt <= 2 { return t.node_indices().collect(); }
+    let mut deg: HashMap<_, _> = t.node_indices().map(|v| (v, t.neighbors(v).count())).collect();
+    let mut leaves: Vec<_> = deg.iter().filter(|&(_, &d)| d == 1).map(|(&v, _)| v).collect();
+    let mut rem = 0;
+    while rem + leaves.len() < cnt {
+        rem += leaves.len();
+        let mut next = Vec::new();
+        for l in leaves {
+            for n in t.neighbors(l) {
+                if let Some(d) = deg.get_mut(&n) { *d -= 1; if *d == 1 { next.push(n); } }
+            }
+            deg.remove(&l);
+        }
+        leaves = next;
+    }
+    deg.keys().cloned().collect()
+}
+
+fn check_transformable(u: NodeIndex, pu: Option<NodeIndex>, t_a: &BlockCutTree, v: NodeIndex, pv: Option<NodeIndex>, t_b: &BlockCutTree) -> bool {
+    let configs = [(1, 1), (1, -1), (-1, 1), (-1, -1)];
+    configs.iter().any(|&(xf, yf)| match_recursive(u, pu, t_a, v, pv, t_b, xf, yf))
+}
+
+fn match_recursive(u: NodeIndex, pu: Option<NodeIndex>, t_a: &BlockCutTree, v: NodeIndex, pv: Option<NodeIndex>, t_b: &BlockCutTree, xf: i8, yf: i8) -> bool {
+    match (&t_a[u], &t_b[v]) {
+        (BCNode::ArticulationPoint(_), BCNode::ArticulationPoint(_)) => {}
+        (BCNode::Block { edges: e1 }, BCNode::Block { edges: e2 }) => {
+            if e1.len() != e2.len() { return false; }
+            let mut te1: Vec<_> = e1.iter().map(|&(dx, dy)| (dx * xf as i32, dy * yf as i32)).collect();
+            let mut e2c = e2.clone(); te1.sort(); e2c.sort();
+            if te1 != e2c { return false; }
+        }
+        _ => return false,
+    }
+    let mut ch_a: Vec<_> = t_a.edges(u).filter(|e| Some(e.target()) != pu).collect();
+    let mut ch_b: Vec<_> = t_b.edges(v).filter(|e| Some(e.target()) != pv).collect();
+    if ch_a.len() != ch_b.len() { return false; }
+
+    let mut matched = vec![false; ch_b.len()];
+    for ea in &ch_a {
+        let pin = ea.weight();
+        let tp = Pin { axis: pin.axis, sign: if pin.axis == Axis::Horizontal { pin.sign * xf } else { pin.sign * yf } };
+        let mut found = false;
+        for (i, eb) in ch_b.iter().enumerate() {
+            if !matched[i] && *eb.weight() == tp {
+                if match_recursive(ea.target(), Some(u), t_a, eb.target(), Some(v), t_b, xf, yf) {
+                    matched[i] = true; found = true; break;
+                }
+            }
+        }
+        if !found { return false; }
+    }
     true
 }
 
-fn render_change(grid: &[Vec<char>], v_pos: (usize, usize)) -> String {
-    let mut out = String::new();
-    for (y, row) in grid.iter().enumerate() {
-        for (x, &c) in row.iter().enumerate() {
-            if (x, y) == v_pos {
-                out.push('#');
-            } else {
-                out.push(c);
+fn parse_grid(path: &str) -> Vec<FigureGraph> {
+    let s = fs::read_to_string(path).unwrap();
+    let mut lines = s.lines().peekable();
+    let mut gs = Vec::new();
+    while let Some(l) = lines.next() {
+        if l.trim().is_empty() { continue; }
+        let d: Vec<usize> = l.split_whitespace().map(|x| x.parse().unwrap()).collect();
+        let rows = 2 * d[1] - 1;
+        let grid: Vec<Vec<char>> = (0..rows).map(|_| lines.next().unwrap().chars().collect()).collect();
+        let mut g = FigureGraph::default();
+        let mut vm = HashMap::new();
+        for y in (0..rows).step_by(2) {
+            for x in (0..grid[y].len()).step_by(2) {
+                if grid[y][x] == 'o' { vm.insert((x, y), g.add_node(())); }
             }
         }
-        out.push('\n');
-    }
-    out
-}
-
-/// Converts vertex index to (x, y) in grid
-fn vertex_coords(vertex: u32, vertex_map: &HashMap<(usize, usize), u32>) -> (usize, usize) {
-    for (&(x, y), &v) in vertex_map {
-        if v == vertex {
-            return (x, y);
+        for y in 0..rows {
+            for x in 0..grid[y].len() {
+                if grid[y][x] == '-' {
+                    // WICHTIG: Richtung wird hier relativ zur Gitterposition definiert
+                    g.add_edge(vm[&(x-1, y)], vm[&(x+1, y)], Pin { axis: Axis::Horizontal, sign: 1 });
+                } else if grid[y][x] == '|' {
+                    g.add_edge(vm[&(x, y-1)], vm[&(x, y+1)], Pin { axis: Axis::Vertical, sign: 1 });
+                }
+            }
         }
+        gs.push(g);
     }
-    panic!("Vertex not found in map");
+    gs
 }
 
-fn write_solution(
-    path: &str,
-    steps: &[u32],
-    grid: &[Vec<char>],
-    vertex_map: &HashMap<(usize, usize), u32>,
-) {
-    let mut file = File::create(path).unwrap();
-    if steps.is_empty() {
-        writeln!(file, "n").unwrap();
-        return;
+fn main() {
+    let graphs = parse_grid("resources/transform03.txt");
+    if graphs.len() < 2 { return; }
+    let bca = build_bc_tree(&graphs[0], &BiconnectedResult::from_graph(&graphs[0]));
+    let bcb = build_bc_tree(&graphs[1], &BiconnectedResult::from_graph(&graphs[1]));
+    let (ca, cb) = (find_centers(&bca), find_centers(&bcb));
+    let mut ok = false;
+    for &ra in &ca {
+        for &rb in &cb {
+            if check_transformable(ra, None, &bca, rb, None, &bcb) { ok = true; break; }
+        }
+        if ok { break; }
     }
-    writeln!(file, "y").unwrap();
-    writeln!(file, "{}", steps.len()).unwrap();
-
-    for &v in steps {
-        let pos = vertex_coords(v, vertex_map);
-        writeln!(file, "{} {}", pos.0, pos.1).unwrap();
-        writeln!(file, "{}", render_change(grid, pos)).unwrap();
-        writeln!(file).unwrap();
-    }
+    println!("{}", if ok { "Transformable!" } else { "Not transformable!" });
 }
